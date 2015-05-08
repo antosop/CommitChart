@@ -8,13 +8,6 @@ var HGMonitor = require('./hg-monitor');
 var numCommits = [];
 var newCommits = [];
 
-var hgMonitor;
-hg.open('C:/html5',function(repo){
-
-    hgMonitor = new HGMonitor(repo);
-
-});
-
 var app = express();
 
 app.get('/data', function(req, res) {
@@ -24,4 +17,11 @@ app.get('/data', function(req, res) {
 app.use('/', express.static(__dirname + '/dist'));
 
 var server = http.createServer(app);
+
+hg.open('C:/html5',function(repo){
+
+    new HGMonitor(server, repo);
+
+});
+
 server.listen(3000);

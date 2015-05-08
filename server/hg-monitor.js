@@ -1,4 +1,6 @@
-function HGMonitor(repo){
+var SSE = require('sse');
+
+function HGMonitor(server, repo){
     function getLog() {
         repo.run('log',['-Tjson','-d today'],function(output) {
             var result = JSON.parse(output);
