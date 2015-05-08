@@ -1,7 +1,7 @@
 module.exports = {
 	//configuration
 	entry: {
-		main: ['./content/scripts/main.js']
+		main: ['expose?jQuery!jquery', './content/scripts/main.js']
 	},
 	output: {
 		path: __dirname + '/dist',
