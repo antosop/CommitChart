@@ -11,6 +11,24 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.12.3",
-    "lodash": "^3.8.0"
+    "lodash": "^3.8.0",
+    "react": "^0.13.2",
+    "react-bootstrap": "^0.21.2"
+  },
+  "devDependencies": {
+    "eslint": "^0.20.0",
+    "eslint-loader": "^0.11.1",
+    "jsx-loader": "^0.13.2",
+    "babel-core": "^5.2.17",
+    "babel-loader": "^5.0.0",
+    "file-loader": "^0.8.1",
+    "parallelshell": "^1.1.1",
+    "style-loader": "^0.12.2",
+    "url-loader": "^0.5.5",
+    "webpack": "^1.8.11"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antosop/SouceCommand.git"
   }
 }
