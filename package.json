@@ -5,18 +5,20 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server/server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "chart.js": "^1.0.2",
     "express": "^4.12.3",
+    "hg": "^0.1.1",
     "jquery": "^2.1.4",
     "lodash": "^3.8.0",
     "react": "^0.13.2",
     "react-bootstrap": "^0.21.2",
-    "react-chartjs": "^0.6.0"
+    "react-chartjs": "^0.6.0",
+    "sse": "0.0.6"
   },
   "devDependencies": {
     "babel-core": "^5.2.17",
