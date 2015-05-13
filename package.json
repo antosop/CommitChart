@@ -10,15 +10,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "chart.js": "^1.0.2",
     "express": "^4.12.3",
     "hg": "^0.1.1",
     "jquery": "^2.1.4",
     "lodash": "^3.8.0",
-    "notifyjs": "^1.2.5",
+    "node-notifier": "^4.2.1",
     "react": "^0.13.2",
     "react-bootstrap": "^0.21.2",
-    "react-chartjs": "^0.6.0",
     "sse": "0.0.6"
   },
   "devDependencies": {
