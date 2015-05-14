@@ -15,6 +15,7 @@
     "jquery": "^2.1.4",
     "lodash": "^3.8.0",
     "node-notifier": "^4.2.1",
+    "open": "0.0.5",
     "react": "^0.13.2",
     "react-bootstrap": "^0.21.2",
     "sse": "0.0.6"

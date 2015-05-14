@@ -19,6 +19,11 @@ function openHgRepo(path, success, failure) {
                 callback(value);
                 value = "";
             });
+
+            commandServer.on("error", function(err, data){
+                console.log(err,data);
+            });
+
             var repo = new Repo(commandServer, queue);
             success(repo);
         }

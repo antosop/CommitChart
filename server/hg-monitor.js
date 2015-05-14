@@ -1,25 +1,24 @@
 var _ = require('lodash');
-/*var SSE = require('sse');*/
+var SSE = require('sse');
 var notifier = require('node-notifier');
+var path = require('path');
+var exec = require('child_process').exec;
+var open = require('open');
 
 function HGMonitor(server, repo){
-    /*var sse = new SSE(server);*/
-    /*var clientQueue = [];*/
+    var sse = new SSE(server);
+    var client=null;
 
-    /*sse.on('connection', function(client) {*/
-        /*console.log('adding client');*/
-        /*clientQueue.push(client);*/
-        /*client.on('close', function(){*/
-            /*console.log('removing client');*/
-            /*_.remove(clientQueue, client);*/
-        /*});*/
-        /*if (eventQueue.length > 0)*/
-            /*console.log('sending queued events');*/
-        /*while (eventQueue.length > 0) {*/
-            /*var eventData = eventQueue.shift();*/
-            /*client.send(eventData);*/
-        /*}*/
-    /*});*/
+    sse.on('connection', function(c) {
+        console.log('adding client:', c);
+        triggerEvent('close', '{}');
+        client=c;
+        c.on('close', function(){
+            if(c === client){
+                client=null;
+            }
+        })
+    });
 
     /*setInterval(function(){*/
         /*notifier.notify({'title': 'PING!', message: 'this is a test', icon: 'c:/SourceCommand/dist/check-in.png', open: 'http://localhost:3000', sound: true});*/
@@ -44,6 +43,10 @@ function HGMonitor(server, repo){
         /*});*/
     /*}*/
 
+    notifier.on('click', function(notifierObject, options){
+        exec('chrome --app=http://localhost:3000/');
+    });
+
     function pullChanges() {
         repo.run('pull',[],function(){});
     }
@@ -61,9 +64,13 @@ function HGMonitor(server, repo){
                 });
 
                 _.forEach(newCommits, function(value, key){
-                    notifier.notify({title: value.length + ' new commits from ' + key, message: _.map(value, function(v, i){
-                            return (i + 1) + ' - ' + v;
-                    }).join('\n'), icon: path.join(__dirname,'check-in.png'), sound: true});
+                    notifier.notify({
+                        title: key + ':' + value.length + (value.length > 1 ? ' commits' : ' commit'),
+                        message:'Click to view',
+                        icon: path.join(__dirname,'check-in.png'),
+                        sound: true,
+                        wait: true
+                    });
                 });
             }
         });
@@ -78,18 +85,13 @@ function HGMonitor(server, repo){
     updateCommits();
     setInterval(updateCommits, 5000);
 
-    /*function triggerEvent(name, data){*/
-        /*var eventData = {event: name, data: data};*/
-        /*if (clientQueue.length > 0){*/
-            /*_.forEach(clientQueue, function(client){*/
-                /*console.log('sending event');*/
-                /*client.send(eventData);*/
-            /*});*/
-        /*} else {*/
-            /*console.log('queueing event');*/
-            /*eventQueue.push(eventData);*/
-        /*}*/
-    /*}*/
+    function triggerEvent(name, data){
+        if(client){
+            var eventData = {event: name, data: data};
+            console.log('sending ' + name + ' event');
+            client.send(eventData);
+        }
+    }
 
     /*this.stop = function(){*/
         /*while (clientQueue.length > 0){*/

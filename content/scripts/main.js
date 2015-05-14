@@ -15,3 +15,12 @@
         /*console.log('ServiceWorker registration failed: ', err);*/
     /*});*/
 /*}*/
+
+var es = new EventSource('/sse');
+es.onerror = function (arg1) {
+    console.log(arg1);
+};
+
+es.addEventListener('close', function(e){
+    window.close();
+});
