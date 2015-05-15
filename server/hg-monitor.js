@@ -10,19 +10,18 @@ function HGMonitor(server, repo){
     var client=null;
 
     sse.on('connection', function(c) {
-        console.log('adding client:', c);
         triggerEvent('close', '{}');
         client=c;
         c.on('close', function(){
             if(c === client){
                 client=null;
             }
-        })
+        });
     });
 
-    /*setInterval(function(){*/
-        /*notifier.notify({'title': 'PING!', message: 'this is a test', icon: 'c:/SourceCommand/dist/check-in.png', open: 'http://localhost:3000', sound: true});*/
-    /*}, 10000);*/
+    //setInterval(function(){
+        //notifier.notify({'title': 'PING!', message: 'this is a test', icon: 'c:/SourceCommand/dist/check-in.png', sound: true, wait: true});
+    //}, 10000);
 
     /*function getLog() {*/
         /*repo.run('log',['-Tjson','-d today'],function(output) {*/
@@ -44,7 +43,12 @@ function HGMonitor(server, repo){
     /*}*/
 
     notifier.on('click', function(notifierObject, options){
-        exec('chrome --app=http://localhost:3000/');
+        if (client){
+            var p = path.join(__dirname,'nircmd.exe win activate title "Source Command"');
+            exec(p);
+        } else {
+            exec('chrome --app=http://localhost:3000/');
+        }
     });
 
     function pullChanges() {
@@ -92,6 +96,11 @@ function HGMonitor(server, repo){
             client.send(eventData);
         }
     }
+
+    process.on('SIGINT', function(){
+        triggerEvent('close', '{}');
+        process.exit(2);
+    });
 
     /*this.stop = function(){*/
         /*while (clientQueue.length > 0){*/

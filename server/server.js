@@ -15,6 +15,6 @@ hg.open('C:/html5',function(repo){
 });
 
 server.listen(3000,function(){
-    exec('chrome --app=http://localhost:3000/');
+    var child = exec('chrome --app=http://localhost:3000/');
 });
 
