@@ -1,11 +1,14 @@
 {
-  "name": "hgchart",
+  "name": "SourceCommand",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server/index.html",
+  "window": {
+    "toolbar": false
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server/server.js"
+    "start": "node node_modules/nw/bin/nw ."
   },
   "author": "",
   "license": "ISC",

@@ -1,23 +1,23 @@
 var _ = require('lodash');
-var SSE = require('sse');
+//var SSE = require('sse');
 var notifier = require('node-notifier');
 var path = require('path');
-var exec = require('child_process').exec;
-var open = require('open');
+//var exec = require('child_process').exec;
+//var open = require('open');
 
-function HGMonitor(server, repo){
-    var sse = new SSE(server);
-    var client=null;
+function HGMonitor(win, repo){
+    //var sse = new SSE(server);
+    //var client=null;
 
-    sse.on('connection', function(c) {
-        triggerEvent('close', '{}');
-        client=c;
-        c.on('close', function(){
-            if(c === client){
-                client=null;
-            }
-        });
-    });
+    //sse.on('connection', function(c) {
+        //triggerEvent('close', '{}');
+        //client=c;
+        //c.on('close', function(){
+            //if(c === client){
+                //client=null;
+            //}
+        //});
+    //});
 
     //setInterval(function(){
         //notifier.notify({'title': 'PING!', message: 'this is a test', icon: 'c:/SourceCommand/dist/check-in.png', sound: true, wait: true});
@@ -43,12 +43,13 @@ function HGMonitor(server, repo){
     /*}*/
 
     notifier.on('click', function(notifierObject, options){
-        if (client){
-            var p = path.join(__dirname,'nircmd.exe win activate title "Source Command"');
-            exec(p);
-        } else {
-            exec('chrome --app=http://localhost:3000/');
-        }
+        win.show();
+        //if (client){
+            //var p = path.join(__dirname,'nircmd.exe win activate title "Source Command"');
+            //exec(p);
+        //} else {
+            //exec('chrome --app=http://localhost:3000/');
+        //}
     });
 
     function pullChanges() {
@@ -69,7 +70,7 @@ function HGMonitor(server, repo){
 
                 _.forEach(newCommits, function(value, key){
                     notifier.notify({
-                        title: key + ':' + value.length + (value.length > 1 ? ' commits' : ' commit'),
+                        title: key + ': ' + value.length + (value.length > 1 ? ' commits' : ' commit'),
                         message:'Click to view',
                         icon: path.join(__dirname,'check-in.png'),
                         sound: true,
@@ -81,6 +82,7 @@ function HGMonitor(server, repo){
     }
 
     function updateCommits() {
+        console.log('updating');
         getIncoming();
         pullChanges();
         /*getLog();*/
@@ -89,18 +91,18 @@ function HGMonitor(server, repo){
     updateCommits();
     setInterval(updateCommits, 5000);
 
-    function triggerEvent(name, data){
-        if(client){
-            var eventData = {event: name, data: data};
-            console.log('sending ' + name + ' event');
-            client.send(eventData);
-        }
-    }
+    //function triggerEvent(name, data){
+        //if(client){
+            //var eventData = {event: name, data: data};
+            //console.log('sending ' + name + ' event');
+            //client.send(eventData);
+        //}
+    //}
 
-    process.on('SIGINT', function(){
-        triggerEvent('close', '{}');
-        process.exit(2);
-    });
+    //process.on('SIGINT', function(){
+        //triggerEvent('close', '{}');
+        //process.exit(2);
+    //});
 
     /*this.stop = function(){*/
         /*while (clientQueue.length > 0){*/
