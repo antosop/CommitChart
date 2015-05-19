@@ -2,10 +2,10 @@
   "name": "SourceCommand",
   "version": "1.0.0",
   "description": "",
-  "main": "server/index.html",
+  "main": "index.html",
   "window": {
     "title": "Source Command",
-    "icon": "server/images/check-in.png",
+    "icon": "images/check-in.png",
     "toolbar": false
   },
   "scripts": {

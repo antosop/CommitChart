@@ -4,7 +4,7 @@ var ws = require('windows-shortcuts');
 ws.create("%UserProfile%/Desktop/Source Command.lnk", {
     target: path.join(__dirname, "node_modules/nw/nwjs/nw.exe"),
     args: __dirname,
-    icon: path.join(__dirname, "server/images/check-in.ico"),
+    icon: path.join(__dirname, "images/check-in.ico"),
     runStyle: ws.NORMAL
 }, function(err){
     if (err)
