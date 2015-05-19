@@ -4,24 +4,26 @@
   "description": "",
   "main": "server/index.html",
   "window": {
+    "title": "Source Command",
+    "icon": "server/images/check-in.png",
     "toolbar": false
   },
   "scripts": {
+    "postinstall": "node shortcut.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node node_modules/nw/bin/nw ."
+    "start": "node shortcut.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.12.3",
     "hg": "^0.1.1",
     "jquery": "^2.1.4",
     "lodash": "^3.8.0",
     "node-notifier": "^4.2.1",
-    "open": "0.0.5",
+    "nw": "^0.12.1",
     "react": "^0.13.2",
     "react-bootstrap": "^0.21.2",
-    "sse": "0.0.6"
+    "windows-shortcuts": "^0.1.1"
   },
   "devDependencies": {
     "babel-core": "^5.2.17",

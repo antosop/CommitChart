@@ -72,7 +72,7 @@ function HGMonitor(win, repo){
                     notifier.notify({
                         title: key + ': ' + value.length + (value.length > 1 ? ' commits' : ' commit'),
                         message:'Click to view',
-                        icon: path.join(__dirname,'check-in.png'),
+                        icon: path.join(process.cwd(),'/server/images/check-in.png'),
                         sound: true,
                         wait: true
                     });

@@ -1,9 +1,16 @@
+var notifier = require('node-notifier');
+var path = require('path');
 var gui = require('nw.gui');
 var win = gui.Window.get();
-win.hide();
 win.on('close',function(){
     this.hide();
-})
+    notifier.notify({
+        title: "Source Command still running",
+        message:"click tray icon to open.",
+        icon: path.join(process.cwd(),'/server/images/check-in.png'),
+        tag: 'running'
+    });
+});
 
 //var http = require('http');
 //var express = require('express');
@@ -25,8 +32,6 @@ hg.open('C:/html5',function(repo){
 //server.listen(3000,function(){
     //var child = exec('chrome --app=http://localhost:3000/');
 //});
-console.log(process.cwd() + '/images/check-in.png');
-
 var gui = require('nw.gui');
 var tray = new gui.Tray({
     icon: 'server/images/check-in.png'
@@ -34,12 +39,15 @@ var tray = new gui.Tray({
 
 var menu = new gui.Menu();
 menu.append(new gui.MenuItem({
-    type: 'checkbox',
-    label: 'Always-on-top'
+    type: 'normal',
+    label: 'close',
+    click: function() {
+        win.close(true);
+    }
 }));
 
 tray.menu = menu;
 
 tray.on('click', function() {
     win.show();
-})
+});
