@@ -23,30 +23,39 @@ hg.open('C:/html5').then(function(repository){
 });
 
 function update(){
-    repo.run('help','rebase').then(function(results){
-        var hasRebase = !results.match(/enabling extensions/g);
-        if (!hasRebase){
-            throw new Error("Please enable rebase extension");
-        }
-        return repo.run('summary');
-    }).then(function(results){
+    repo.run('summary').then(function(results){
         var unclean = !results.match(/commit: .*\(clean\)/g);
         if (unclean){
            throw new Error("Please checkin, shelf, or revert");
+        }
+        var needsUpdate = !results.match(/update: \(current\)/g);
+        if (!needsUpdate){
+            throw new Error("Already up to date");
         }
         return repo.run('outgoing');
     }).then(function(results){
         var needsRebase = !results.match(/no changes found/g);
         if (needsRebase){
-            return repo.run('rebase');
+            return repo.run('help','rebase').then(function(results){
+                var hasRebase = !results.match(/enabling extensions/g);
+                if (!hasRebase){
+                    throw new Error("Please enable rebase extension");
+                }
+                return repo.run('rebase');
+            })
         } else {
             return repo.run('update');
         }
+    }).then(function(){
+        notifier.notify({
+            title: "Update Successful",
+            icon: path.join(process.cwd(), "images/update.png")
+        });
     }).catch(function(err){
         notifier.notify({
             title: "Error Updating",
             message: err.message,
-            icon: path.join(process.cwd(), "images/reject-red.png"),
+            icon: path.join(process.cwd(), "images/reject-red.png")
         });
     });
 }
@@ -68,7 +77,7 @@ menu.append(new gui.MenuItem({
 menu.append(new gui.MenuItem({
     type: 'normal',
     label: 'update',
-    icon: 'images/update.png',
+    icon: 'images/update-16.png',
     click: update
 }))
 

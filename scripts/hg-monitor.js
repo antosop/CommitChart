@@ -38,7 +38,7 @@ function HGMonitor(win, repo){
     }
 
     function updateCommits() {
-        console.log('updating');
+        console.log('pulling');
         getIncoming();
         pullChanges();
     }

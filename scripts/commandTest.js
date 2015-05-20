@@ -16,6 +16,10 @@ hg.open('C:/html5').then(function(repository){
     if (unclean){
        throw new Error("Please checkin, shelf, or revert");
     }
+    var needsUpdate = !results.match(/update: \(current\)/g);
+    if (!needsUpdate){
+        throw new Error("No Update Needed");
+    }
     return repo.run('outgoing');
 }).then(function(results){
     var needsRebase = !results.match(/no changes found/g);

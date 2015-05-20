@@ -17,6 +17,7 @@ function openHgRepo(path) {
                 });
 
                 commandServer.on("result", function(err, code) {
+                    //console.log(err,' : ',code);
                     if (!fail){
                         var callback = queue.shift().resolve;
                         callback(value);
@@ -26,7 +27,7 @@ function openHgRepo(path) {
                 });
 
                 commandServer.on("error", function(err, data){
-                    console.log(err);
+                    //console.log(err,' : ',data);
                     queue.shift().reject(err);
                     fail = true;
                 });
@@ -40,7 +41,7 @@ function openHgRepo(path) {
 
 function Repo(commandServer, queue){
     this.run = function() {
-        var args = arguments
+        var args = arguments;
         return new Promise(function(resolve, reject){
             commandServer.runcommand.apply(commandServer,args);
             queue.push({resolve: resolve, reject: reject});
