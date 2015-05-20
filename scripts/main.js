@@ -42,13 +42,14 @@ function update(){
                     throw new Error("Please enable rebase extension");
                 }
                 return repo.run('rebase');
-            })
+            });
         } else {
             return repo.run('update');
         }
     }).then(function(){
         notifier.notify({
-            title: "Update Successful",
+            title: "Success",
+            message: "Update successful",
             icon: path.join(process.cwd(), "images/update.png")
         });
     }).catch(function(err){
