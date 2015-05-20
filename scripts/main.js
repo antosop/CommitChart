@@ -41,7 +41,7 @@ function update(){
                 if (!hasRebase){
                     throw new Error("Please enable rebase extension");
                 }
-                return repo.run('rebase');
+                return repo.run('rebase','-b .','-d first(head()-(.::))');
             });
         } else {
             return repo.run('update');
