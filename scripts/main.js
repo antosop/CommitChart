@@ -16,10 +16,40 @@ win.on('close',function(){
 var hg = require('./scripts/hg');
 var HGMonitor = require('./scripts/hg-monitor');
 var path = require('path');
-
-hg.open('C:/html5',function(repo){
+var repo;
+hg.open('C:/html5').then(function(repository){
+    repo = repository;
     new HGMonitor(win, repo);
 });
+
+function update(){
+    repo.run('help','rebase').then(function(results){
+        var hasRebase = !results.match(/enabling extensions/g);
+        if (!hasRebase){
+            throw new Error("Please enable rebase extension");
+        }
+        return repo.run('summary');
+    }).then(function(results){
+        var unclean = !results.match(/commit: .*\(clean\)/g);
+        if (unclean){
+           throw new Error("Please checkin, shelf, or revert");
+        }
+        return repo.run('outgoing');
+    }).then(function(results){
+        var needsRebase = !results.match(/no changes found/g);
+        if (needsRebase){
+            return repo.run('rebase');
+        } else {
+            return repo.run('update');
+        }
+    }).catch(function(err){
+        notifier.notify({
+            title: "Error Updating",
+            message: err.message,
+            icon: path.join(process.cwd(), "images/reject-red.png"),
+        });
+    });
+}
 
 var gui = require('nw.gui');
 var tray = new gui.Tray({
@@ -35,8 +65,16 @@ menu.append(new gui.MenuItem({
     }
 }));
 
+menu.append(new gui.MenuItem({
+    type: 'normal',
+    label: 'update',
+    icon: 'images/update.png',
+    click: update
+}))
+
 tray.menu = menu;
 
 tray.on('click', function() {
     win.show();
 });
+

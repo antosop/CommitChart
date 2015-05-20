@@ -9,11 +9,11 @@ function HGMonitor(win, repo){
     });
 
     function pullChanges() {
-        repo.run('pull',[],function(){});
+        repo.run('pull');
     }
 
     function getIncoming() {
-        repo.run('incoming',['-Tjson', '-M'],function(output) {
+        repo.run('incoming','-Tjson', '-M').then(function(output) {
             var match = output.match(/[\[\{](.|[\r\n])*[\]\}]/);
             if (match) {
                 var commitInfo = _.map(JSON.parse(match[0]),function(commit){
