@@ -6,7 +6,8 @@
   "window": {
     "title": "Source Command",
     "icon": "images/check-in.png",
-    "toolbar": true
+    "toolbar": false,
+    "show": false
   },
   "scripts": {
     "postinstall": "node shortcut.js",
