@@ -1,12 +1,16 @@
 var _ = require('lodash');
-var notifier = require('node-notifier');
-var path = require('path');
+var EventEmitter = require('events').EventEmitter;
 
-function HGMonitor(win, repo){
+var Status = {
+    clean: 0,
+    commit: 1,
+    update: 2,
+    push: 3
+};
 
-    notifier.on('click', function(notifierObject, options){
-        win.show();
-    });
+function HGMonitor(repo){
+    EventEmitter.call(this);
+    var that = this;
 
     function pullChanges() {
         repo.run('pull');
@@ -25,25 +29,45 @@ function HGMonitor(win, repo){
                 });
 
                 _.forEach(newCommits, function(value, key){
-                    notifier.notify({
-                        title: key + ': ' + value.length + (value.length > 1 ? ' commits' : ' commit'),
-                        message:'Click to view',
-                        icon: path.join(process.cwd(),'images/check-in.png'),
-                        sound: true,
-                        wait: true
-                    });
+                    console.log(key, " : ", value);
+                    that.emit('incoming', key, value);
+                });
+            }
+        });
+    }
+
+    function checkStatus() {
+        repo.run('summary').then(function(output) {
+            var needsCommit = !output.match(/commit: .*\(clean\)/g);
+            var needsUpdate = !output.match(/update: \(current\)/g);
+            if (needsCommit) {
+                that.emit('status', Status.commit);
+            } else if (needsUpdate) {
+                that.emit('status', Status.update);
+            } else {
+                repo.run('outgoing').then(function(output) {
+                    var needsPush = !output.match(/no changes found/g);
+                    if (needsPush) {
+                        that.emit('status', Status.push);
+                    } else {
+                        that.emit('status', Status.clean);
+                    }
                 });
             }
         });
     }
 
     function updateCommits() {
-        console.log('pulling');
+        console.log("monitoring");
         getIncoming();
         pullChanges();
+        checkStatus();
+        //that.emit('test');
     }
 
     updateCommits();
     setInterval(updateCommits, 5000);
 }
+HGMonitor.prototype = new EventEmitter();
+HGMonitor.Status = Status;
 module.exports = HGMonitor;
