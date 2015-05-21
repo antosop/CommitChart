@@ -1,7 +1,7 @@
 {
   "name": "SourceCommand",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.1.0",
+  "description": "A web based interface for interacting with and getting notifications from sorce control.",
   "main": "index.html",
   "window": {
     "title": "Source Command",
@@ -14,7 +14,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node shortcut.js"
   },
-  "author": "",
+  "author": "Landon Crapo",
   "license": "ISC",
   "dependencies": {
     "hg": "^0.1.1",
@@ -42,5 +42,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/antosop/SouceCommand.git"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/antosop/SouceCommand/issues"
+  },
+  "homepage": "https://github.com/antosop/SouceCommand"
 }
