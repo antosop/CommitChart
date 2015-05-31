@@ -66,7 +66,11 @@ function HGMonitor(repo){
     }
 
     updateCommits();
-    setInterval(updateCommits, 5000);
+    var intervalId = setInterval(updateCommits, 5000);
+    this.stop = function(){
+        clearInterval(intervalId);
+        this.removeAllListeners();
+    }
 }
 HGMonitor.prototype = new EventEmitter();
 HGMonitor.Status = Status;

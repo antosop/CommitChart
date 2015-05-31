@@ -2,17 +2,20 @@
   "name": "SourceCommand",
   "version": "0.1.0",
   "description": "A web based interface for interacting with and getting notifications from sorce control.",
-  "main": "index.html",
+  "main": "dist/index.html",
   "window": {
     "title": "Source Command",
-    "icon": "images/check-in.png",
+    "icon": "content/images/check-in.png",
     "toolbar": false,
-    "show": false
+    "frame": false,
+    "show": true,
+    "height": 85,
+    "min_height": 85
   },
   "scripts": {
     "postinstall": "node shortcut.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node shortcut.js"
+    "start": "\"node_modules\\nw\\nwjs\\nw.exe\" ."
   },
   "author": "Landon Crapo",
   "license": "ISC",
@@ -27,17 +30,22 @@
     "windows-shortcuts": "^0.1.1"
   },
   "devDependencies": {
-    "babel-core": "^5.2.17",
-    "babel-loader": "^5.0.0",
+    "babel-loader": "^5.1.3",
+    "bootstrap": "^3.3.4",
+    "bootstrap-webpack": "0.0.3",
+    "css-loader": "^0.13.1",
+    "es6-promise": "^2.1.1",
     "eslint": "^0.20.0",
-    "eslint-loader": "^0.11.1",
-    "expose-loader": "^0.6.0",
-    "file-loader": "^0.8.1",
+    "eslint-loader": "^0.11.2",
+    "expose-loader": "^0.7.0",
+    "file-loader": "^0.8.3",
+    "imports-loader": "^0.6.4",
     "jsx-loader": "^0.13.2",
+    "less": "^2.5.1",
+    "less-loader": "^2.2.0",
     "parallelshell": "^1.1.1",
     "style-loader": "^0.12.2",
-    "url-loader": "^0.5.5",
-    "webpack": "^1.8.11"
+    "url-loader": "^0.5.5"
   },
   "repository": {
     "type": "git",
