@@ -13,7 +13,7 @@
     "min_height": 85
   },
   "scripts": {
-    "build": "webpack",
+    "install": "webpack",
     "postinstall": "node shortcut.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "\"node_modules\\nw\\nwjs\\nw.exe\" ."
