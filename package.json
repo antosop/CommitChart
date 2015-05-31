@@ -13,7 +13,6 @@
     "min_height": 85
   },
   "scripts": {
-    "install": "webpack",
     "postinstall": "node shortcut.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "\"node_modules\\nw\\nwjs\\nw.exe\" ."
@@ -26,7 +25,6 @@
     "lodash": "^3.8.0",
     "node-notifier": "^4.2.1",
     "nw": "^0.12.1",
-    "parallelshell": "^1.1.1",
     "react": "^0.13.2",
     "react-bootstrap": "^0.21.2",
     "windows-shortcuts": "^0.1.1"
