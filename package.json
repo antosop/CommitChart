@@ -6,16 +6,16 @@
   "window": {
     "title": "Source Command",
     "icon": "content/images/check-in.png",
-    "toolbar": false,
+    "toolbar": true,
     "frame": false,
     "show": true,
-    "height": 85,
-    "min_height": 85
+    "height": 135,
+    "min_height": 135
   },
   "scripts": {
     "postinstall": "node shortcut.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "\"node_modules\\nw\\nwjs\\nw.exe\" ."
+    "start": "parallelshell \"webpack --watch\" \"node_modules\\nw\\nwjs\\nw.exe .\""
   },
   "author": "Landon Crapo",
   "license": "ISC",

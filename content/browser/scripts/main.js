@@ -51,7 +51,7 @@ function update(){
                 if (!hasRebase){
                     throw new Error("Please enable rebase extension");
                 }
-                return repo.run('rebase','-b .','-d first(head()-(.::))');
+                return repo.run('rebase','-b .','-d @');
             });
         } else {
             return repo.run('update');
@@ -115,13 +115,13 @@ var tray = new gui.Tray({
 });
 
 var menu = new gui.Menu();
-menu.append(new gui.MenuItem({
+var bookmarkMenuItem = new gui.MenuItem({
     type: 'normal',
-    label: 'close',
-    click: function() {
-        win.close(true);
-    }
-}));
+    label: '...',
+    icon: path.join(imgDir, 'bookmark.png'),
+    enabled: false
+});
+menu.append(bookmarkMenuItem);
 
 menu.append(new gui.MenuItem({
     type: 'normal',
@@ -135,6 +135,15 @@ menu.append(new gui.MenuItem({
     label: 'push',
     icon: path.join(imgDir, 'push-16.png'),
     click: function(){runIfOpen("Push",push);}
+}));
+
+menu.append(new gui.MenuItem({
+    type: 'normal',
+    label: 'close',
+    icon: path.join(imgDir, 'close.png'),
+    click: function() {
+        win.close(true);
+    }
 }));
 
 tray.menu = menu;
@@ -181,12 +190,17 @@ function updateStatus(repoStatus){
     }
 }
 
+function updateCurrentBookmark(name){
+    bookmarkMenuItem.label = name;
+}
+
 function openRepo() {
     hg.open(directory).then(function(repository){
         repo = repository;
         monitor = new HGMonitor(repo);
         monitor.on('incoming', notifyIncoming);
         monitor.on('status', updateStatus);
+        monitor.on('bookmark', updateCurrentBookmark);
     }).catch(function(err){
         repo = null;
         monitor = null;
