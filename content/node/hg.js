@@ -4,7 +4,7 @@ var fs = require('fs');
 
 function openHgRepo(dir) {
     return new Promise(function(resolve, reject){
-        fs.exists(path.join(dir, '.hg'),function(exists){
+        fs.exists(path.join(dir, '.hg'), function(exists){
             if (exists){
                 var commandServer = new HGCommandServer();
                 var queue = [];
@@ -12,28 +12,26 @@ function openHgRepo(dir) {
                     if (err){
                         reject(err);
                     } else {
-                        var value = "";
-                        var fail = false;
-                        commandServer.on("output", function(err, lines) {
+                        var value = '';
+                        commandServer.on('output', function(body, lines) {
                             lines.forEach(function(line) {
                                 value = value + line.body;
                             });
                         });
 
-                        commandServer.on("result", function(err, code) {
-                            //console.log(err,' : ',code);
-                            if (!fail){
-                                var callback = queue.shift().resolve;
-                                callback(value);
-                                value = "";
+                        commandServer.on('result', function(body) {
+                            var callbacks = queue.shift();
+                            if (parseInt(body, 10) === 0){
+                                callbacks.resolve(value);
+                            } else {
+                                callbacks.reject(new Error(value));
                             }
-                            fail = false;
+                            value = '';
                         });
 
-                        commandServer.on("error", function(err, data){
+                        commandServer.on('error', function(error){
                             //console.log(err,' : ',data);
-                            queue.shift().reject(err);
-                            fail = true;
+                            value = value + error.message;
                         });
 
                         var repo = new Repo(commandServer, queue);
@@ -41,7 +39,7 @@ function openHgRepo(dir) {
                     }
                 });
             } else {
-                reject(new Error("repo does not exist."));
+                reject(new Error('repo does not exist.'));
             }
         });
     });
@@ -51,7 +49,7 @@ function Repo(commandServer, queue){
     this.run = function() {
         var args = arguments;
         return new Promise(function(resolve, reject){
-            commandServer.runcommand.apply(commandServer,args);
+            commandServer.runcommand.apply(commandServer, args);
             queue.push({resolve: resolve, reject: reject});
         });
     };

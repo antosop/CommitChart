@@ -13,28 +13,31 @@ function HGMonitor(repo){
     var that = this;
 
     function pullChanges() {
-        repo.run('pull').then(function(output){
-            return repo.run('bookmark','-f', '@', '-r heads(! outgoing())');
+        return repo.run('pull').then(function(){
+            return repo.run('bookmark', '-f', '@', '-r heads(! outgoing())');
         });
     }
 
     function getIncoming() {
-        repo.run('incoming','-Tjson', '-M').then(function(output) {
+        return repo.run('incoming', '-Tjson', '-M').then(function(output) {
             var match = output.match(/[\[\{](.|[\r\n])*[\]\}]/);
             if (match) {
-                var commitInfo = _.map(JSON.parse(match[0]),function(commit){
-                    return {user:commit.user, comment:commit.desc};
+                var commitInfo = _.map(JSON.parse(match[0]), function(commit){
+                    return {user: commit.user, comment: commit.desc};
                 });
-                var newCommits = _.groupBy(commitInfo,'user');
+                var newCommits = _.groupBy(commitInfo, 'user');
                 _.forEach(newCommits, function(n, key){
-                    newCommits[key] = _.pluck(n,'comment');
+                    newCommits[key] = _.pluck(n, 'comment');
                 });
 
                 _.forEach(newCommits, function(value, key){
-                    console.log(key, " : ", value);
+                    console.log(key, ' : ', value);
                     that.emit('incoming', key, value);
                 });
             }
+            return pullChanges();
+        }).catch(function(err){
+            console.log(err);
         });
     }
 
@@ -43,13 +46,12 @@ function HGMonitor(repo){
         var needsUpdate;
         var hasOutgoing;
         var needsCommit;
-        repo.run('log', '-r .', '-T {currentbookmark}')
+        return repo.run('log', '-r .', '-T {currentbookmark}')
         .then(function(output){
             currentBookmark = output.trim();
             that.emit('bookmark', currentBookmark || 'default');
             return repo.run('log', '-Tjson', '-r (::@)-(::.)');
         }).then(function(output){
-            console.log(output);
             needsUpdate = JSON.parse(output).length > 0;
             return repo.run('log', '-Tjson', '-r (::.)-(::@)');
         }).then(function(output){
@@ -90,19 +92,18 @@ function HGMonitor(repo){
         //});
     }
 
-    function updateCommits() {
-        getIncoming();
-        pullChanges();
-        checkStatus();
+    this.updateHistory = function() {
+        return getIncoming()
+        .then(checkStatus);
         //that.emit('test');
-    }
+    };
 
-    updateCommits();
-    var intervalId = setInterval(updateCommits, 5000);
+    this.updateHistory();
+    var intervalId = setInterval(this.updateHistory, 5000);
     this.stop = function(){
         clearInterval(intervalId);
         this.removeAllListeners();
-    }
+    };
 }
 HGMonitor.prototype = new EventEmitter();
 HGMonitor.Status = Status;

@@ -26,7 +26,7 @@ var repo;
 hg.open('C:/html5').then(function(repository){
     repo = repository;
     return repo.run('log', '-r .', '-T {currentbookmark}');
-}).then(function(r){
+}).then(function(e, r){
     console.log('"' + r.trim() + '"');
     repo.close();
 }).catch(function(e){
