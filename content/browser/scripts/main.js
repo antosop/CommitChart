@@ -14,7 +14,7 @@ var imgDir = path.join(process.cwd(), 'content/images');
 var directory = 'C:/html5';
 var repo = null;
 var monitor = null;
-var repoStatus = HGMonitor.Status.clean;
+var repoState = hg.State.clean;
 var waiting = false;
 
 notifier.on('click', function(){
@@ -32,45 +32,16 @@ win.on('close', function(){
 });
 
 function update(){
-    var currentBookmark;
-    var needsUpdate;
-    var hasOutgoing;
-    var needsCommit;
-    return repo.run('log', '-r .', '-T {currentbookmark}')
-    .then(function(output){
-        currentBookmark = output.trim();
-        return repo.run('log', '-Tjson', '-r (::@)-(::.)');
-    }).then(function(output){
-        needsUpdate = JSON.parse(output).length > 0;
-        return repo.run('log', '-Tjson', '-r (::.)-(::@)');
-    }).then(function(output){
-        hasOutgoing = JSON.parse(output).length > 0;
-        return repo.run('summary');
-    }).then(function(output){
-        needsCommit = !output.match(/commit: .*\(clean\)/g);
-        if ((hasOutgoing || !needsUpdate) && needsCommit) {
-            throw new Error('Please checkin, shelf, or revert');
-        }
-        if (needsUpdate) {
-            if (hasOutgoing){
-                return repo.run('help', 'rebase').then(function(output){
-                    var hasRebase = !output.match(/enabling extensions/g);
-                    if (!hasRebase){
-                        throw new Error('Please enable rebase extension');
-                    }
-                    return repo.run('rebase', '-b .', '-d @');
-                });
-            } else {
-                return repo.run('update', '@').then(function(){
-                    if(currentBookmark){
-                        return repo.run('bookmark', '-f', currentBookmark);
-                    } else {
-                        return repo.run('bookmark', '-i');
-                    }
-                });
-            }
-        } else {
-            throw new Error('Already up to date');
+    return repo.getCurrentState().then(function(state){
+        switch (state){
+            case hg.State.commit:
+                throw new Error('Please checkin, shelf, or revert');
+            case hg.State.rebase:
+                return repo.rebase();
+            case hg.State.update:
+                return repo.updateToRemoteHead();
+            default:
+                throw new Error('Already up to date');
         }
     }).then(function(){
         notifier.notify({
@@ -82,23 +53,13 @@ function update(){
 }
 
 function push(){
-    return repo.run('push', '-r .').then(function(){
+    return repo.push().then(function(){
         notifier.notify({
             title: 'Success',
             message: 'Push successful',
             icon: path.join(imgDir, 'push.png')
         });
-    }).catch(function(err){
-        var noChanges = !!err.message.match(/no changes found/g);
-        var abort = err.message.match(/abort:.*/);
-        if (noChanges){
-            throw new Error('Nothing to push');
-        }
-        if (abort){
-            throw new Error(abort);
-        }
     });
-
 }
 
 function runIfOpen(action, func){
@@ -171,21 +132,22 @@ function beginWait() {
     tray.tooltip = 'waiting...';
 }
 
-function showStatus() {
-    switch (repoStatus) {
-        case HGMonitor.Status.clean:
+function showState() {
+    switch (repoState) {
+        case hg.State.clean:
             tray.icon = path.join(imgDir, 'check-in.png');
             tray.tooltip = 'everything up to date.';
             break;
-        case HGMonitor.Status.commit:
+        case hg.State.commit:
             tray.icon = path.join(imgDir, 'commit-16.png');
             tray.tooltip = 'you have changes to commit.';
             break;
-        case HGMonitor.Status.update:
+        case hg.State.rebase:
+        case hg.State.update:
             tray.icon = path.join(imgDir, 'update-16.png');
             tray.tooltip = 'you need to update.';
             break;
-        case HGMonitor.Status.push:
+        case hg.State.push:
             tray.icon = path.join(imgDir, 'push-16.png');
             tray.tooltip = 'you have commits to push.';
             break;
@@ -194,7 +156,7 @@ function showStatus() {
 
 function stopWaiting() {
     waiting = false;
-    showStatus();
+    showState();
 }
 
 
@@ -209,10 +171,10 @@ function notifyIncoming(user, commitMessages){
     });
 }
 
-function updateStatus(stat){
-    repoStatus = stat;
+function updateState(stat){
+    repoState = stat;
     if (!waiting){
-        showStatus();
+        showState();
     }
 }
 
@@ -225,7 +187,7 @@ function openRepo() {
         repo = repository;
         monitor = new HGMonitor(repo);
         monitor.on('incoming', notifyIncoming);
-        monitor.on('status', updateStatus);
+        monitor.on('state', updateState);
         monitor.on('bookmark', updateCurrentBookmark);
     }).catch(function(){
         repo = null;
@@ -250,7 +212,6 @@ function handleRepoChange(dir) {
 
 function renderView(){
     var mainView = <MainView onRepoChange={handleRepoChange} repoDir={{value: directory, isValid: !!repo}} />;
-
     React.render(mainView, document.getElementById('container'));
 }
 
@@ -258,6 +219,5 @@ jQuery(win.window.document).ready(function(){
     jQuery('#close-window').on('click', function(){
         win.close();
     });
-
     openRepo();
 });

@@ -1,28 +1,14 @@
 var _ = require('lodash');
 var EventEmitter = require('events').EventEmitter;
 
-var Status = {
-    clean: 0,
-    commit: 1,
-    update: 2,
-    push: 3
-};
-
 function HGMonitor(repo){
     EventEmitter.call(this);
     var that = this;
 
-    function pullChanges() {
-        return repo.run('pull').then(function(){
-            return repo.run('bookmark', '-f', '@', '-r heads(! outgoing())');
-        });
-    }
-
-    function getIncoming() {
-        return repo.run('incoming', '-Tjson', '-M').then(function(output) {
-            var match = output.match(/[\[\{](.|[\r\n])*[\]\}]/);
-            if (match) {
-                var commitInfo = _.map(JSON.parse(match[0]), function(commit){
+    function getChangesFromRemote() {
+        return repo.getIncoming().then(function(changesets){
+            if(changesets) {
+                var commitInfo = _.map(changesets, function(commit){
                     return {user: commit.user, comment: commit.desc};
                 });
                 var newCommits = _.groupBy(commitInfo, 'user');
@@ -31,70 +17,30 @@ function HGMonitor(repo){
                 });
 
                 _.forEach(newCommits, function(value, key){
-                    console.log(key, ' : ', value);
                     that.emit('incoming', key, value);
                 });
+                return repo.pullChanges();
             }
-            return pullChanges();
-        }).catch(function(err){
-            console.log(err);
         });
     }
 
-    function checkStatus() {
-        var currentBookmark;
-        var needsUpdate;
-        var hasOutgoing;
-        var needsCommit;
-        return repo.run('log', '-r .', '-T {currentbookmark}')
-        .then(function(output){
-            currentBookmark = output.trim();
+    function checkState() {
+        return repo.getCurrentBookmark()
+        .then(function(currentBookmark){
             that.emit('bookmark', currentBookmark || 'default');
-            return repo.run('log', '-Tjson', '-r (::@)-(::.)');
-        }).then(function(output){
-            needsUpdate = JSON.parse(output).length > 0;
-            return repo.run('log', '-Tjson', '-r (::.)-(::@)');
-        }).then(function(output){
-            hasOutgoing = JSON.parse(output).length > 0;
-            return repo.run('summary');
-        }).then(function(output){
-            needsCommit = !output.match(/commit: .*\(clean\)/g);
-            if ((hasOutgoing || !needsUpdate) && needsCommit) {
-                that.emit('status', Status.commit);
-            } else if (needsUpdate) {
-                that.emit('status', Status.update);
-            } else if (hasOutgoing) {
-                that.emit('status', Status.push);
-            } else {
-                that.emit('status', Status.clean);
-            }
-        }).catch(function(err){
-            console.log(err);
+            return repo.getCurrentState();
+        }).then(function(state){
+            that.emit('state', state);
         });
-
-        //repo.run('summary').then(function(output) {
-            //var needsCommit = !output.match(/commit: .*\(clean\)/g);
-            //var needsUpdate = !output.match(/update: \(current\)/g);
-            //if (needsCommit) {
-                //that.emit('status', Status.commit);
-            //} else if (needsUpdate) {
-                //that.emit('status', Status.update);
-            //} else {
-                //repo.run('outgoing').then(function(output) {
-                    //var needsPush = !output.match(/no changes found/g);
-                    //if (needsPush) {
-                        //that.emit('status', Status.push);
-                    //} else {
-                        //that.emit('status', Status.clean);
-                    //}
-                //});
-            //}
-        //});
     }
 
     this.updateHistory = function() {
-        return getIncoming()
-        .then(checkStatus);
+        return getChangesFromRemote()
+        .then(function(){ return repo.bookmarkRemoteHead(); })
+        .then(checkState)
+        .catch(function(err){
+            console.log(err);
+        });
         //that.emit('test');
     };
 
@@ -105,6 +51,6 @@ function HGMonitor(repo){
         this.removeAllListeners();
     };
 }
+
 HGMonitor.prototype = new EventEmitter();
-HGMonitor.Status = Status;
 module.exports = HGMonitor;
