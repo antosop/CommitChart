@@ -146,7 +146,7 @@ Repo.prototype.getCurrentState = function() {
     });
 };
 
-Repo.prototype.rebase = function() {
+Repo.prototype.rebaseToRemoteHead = function() {
     var repo = this;
     return repo.run('help', 'rebase').then(function(output){
         var hasRebase = !output.match(/enabling extensions/g);

@@ -37,7 +37,7 @@ function update(){
             case hg.State.commit:
                 throw new Error('Please checkin, shelf, or revert');
             case hg.State.rebase:
-                return repo.rebase();
+                return repo.rebaseToRemoteHead();
             case hg.State.update:
                 return repo.updateToRemoteHead();
             default:
