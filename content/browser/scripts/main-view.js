@@ -16,7 +16,6 @@ var MainView = React.createClass({
     },
 
     handleCloseClick() {
-        console.log('close');
         this.props.onClose();
     },
 

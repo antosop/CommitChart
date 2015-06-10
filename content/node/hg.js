@@ -1,6 +1,7 @@
 var HGCommandServer = require('hg').HGCommandServer;
 var path = require('path');
 var fs = require('fs');
+var _ = require('lodash');
 
 var State = {
     clean: 0,
@@ -9,6 +10,8 @@ var State = {
     rebase: 3,
     push: 4
 };
+
+var remoteBranchHead = 'heads((! outgoing()) & branch(.))';
 
 function openHgRepo(dir) {
     return new Promise(function(resolve, reject){
@@ -67,12 +70,32 @@ function Repo(commandServer, queue){
     };
 }
 
-Repo.prototype.bookmarkRemoteHead = function() {
-    return this.run('bookmark', '-f', '@', '-r heads(! outgoing())');
+Repo.prototype.getBranches = function() {
+    return this.run('branches', '-Tjson').then(function(output){
+        var branchData = JSON.parse(output);
+        var branchNames = _.map(branchData, function(data){
+            return data.branch;
+        });
+        return Promise.resolve(branchNames);
+    });
 };
 
+Repo.prototype.getCurrentBranch = function() {
+    return this.run('branch').then(function(branch){
+        return Promise.resolve(branch.trim());
+    });
+};
+
+//Repo.prototype.bookmarkRemoteBranchHead = function() {
+    //var repo = this;
+    //return repo.getCurrentBranch().then(function(branchName){
+        //return repo.run('bookmark', '-f', '@' + branchName, '-r ' + remoteBranchHead);
+    //});
+//};
+
 Repo.prototype.pullChanges = function() {
-    return this.run('pull').then(this.bookmarkRemoteHead);
+    return this.run('pull');
+    //.then(this.bookmarkRemoteBranchHead);
 };
 
 Repo.prototype.getIncoming = function() {
@@ -103,12 +126,12 @@ Repo.prototype.log = function(revset) {
     });
 };
 
-Repo.prototype.getChangesToRemoteHead = function() {
-    return this.log('(::@)-(::.)');
+Repo.prototype.getChangesToRemoteBranchHead = function() {
+    return this.log('(::' + remoteBranchHead + ')-(::.)');
 };
 
 Repo.prototype.getBranchingChanges = function() {
-    return this.log('(::.)-(::@)');
+    return this.log('(::.)-(::' + remoteBranchHead + ')');
 };
 
 Repo.prototype.needsCommit = function() {
@@ -122,7 +145,7 @@ Repo.prototype.getCurrentState = function() {
     var needsUpdate;
     var hasOutgoing;
     var needsCommit;
-    return repo.getChangesToRemoteHead().then(function(changesets){
+    return repo.getChangesToRemoteBranchHead().then(function(changesets){
         needsUpdate = changesets.length > 0;
         return repo.getBranchingChanges();
     }).then(function(changesets){
@@ -146,14 +169,14 @@ Repo.prototype.getCurrentState = function() {
     });
 };
 
-Repo.prototype.rebaseToRemoteHead = function() {
+Repo.prototype.rebaseToRemoteBranchHead = function() {
     var repo = this;
     return repo.run('help', 'rebase').then(function(output){
         var hasRebase = !output.match(/enabling extensions/g);
         if (!hasRebase){
             throw new Error('Please enable rebase extension');
         }
-        return repo.run('rebase', '-b .', '-d @');
+        return repo.run('rebase', '-b .', '-d ' + remoteBranchHead);
     });
 };
 
@@ -161,18 +184,16 @@ Repo.prototype.update = function(revision) {
     return this.run('update', revision);
 };
 
-Repo.prototype.updateToRemoteHead = function() {
+Repo.prototype.updateToRemoteBranchHead = function() {
     var repo = this;
     var currentBookmark;
     return repo.getCurrentBookmark()
     .then(function(output){
         currentBookmark = output;
-        return repo.update('@');
+        return repo.update(remoteBranchHead);
     }).then(function(){
         if(currentBookmark){
             return repo.run('bookmark', '-f', currentBookmark);
-        } else {
-            return repo.run('bookmark', '-i');
         }
     });
 };

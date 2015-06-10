@@ -25,9 +25,12 @@ function HGMonitor(repo){
     }
 
     function checkState() {
-        return repo.getCurrentBookmark()
-        .then(function(currentBookmark){
-            that.emit('bookmark', currentBookmark || 'default');
+        var branch = '';
+        return repo.getCurrentBranch().then(function(currentBranch){
+            branch = currentBranch;
+            return repo.getCurrentBookmark();
+        }).then(function(currentBookmark){
+            that.emit('bookmark', (currentBookmark ? currentBookmark + ' : ' : '') + branch);
             return repo.getCurrentState();
         }).then(function(state){
             that.emit('state', state);
@@ -36,7 +39,7 @@ function HGMonitor(repo){
 
     this.updateHistory = function() {
         return getChangesFromRemote()
-        .then(function(){ return repo.bookmarkRemoteHead(); })
+        //.then(function(){ return repo.bookmarkRemoteBranchHead(); })
         .then(checkState)
         .catch(function(err){
             console.log(err);
