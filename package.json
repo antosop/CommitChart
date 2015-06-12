@@ -9,8 +9,8 @@
     "toolbar": true,
     "frame": false,
     "show": true,
-    "height": 125,
-    "min_height": 125
+    "height": 400,
+    "min_height": 300
   },
   "scripts": {
     "postinstall": "node shortcut.js",

@@ -10,7 +10,7 @@ body{
     height:100%;
     width:100%;
     text-align:right;
-    background: #222;
+    background: #111;
     -webkit-app-region: drag;
 }
 
@@ -23,12 +23,10 @@ body{
 #title-bar a{
     padding: 2px 5px 1px 5px;
     color: #888;
-    /*background: #821;*/
 }
 
 #title-bar a:hover{
     color: #aaa;
-    /*background: #f52;*/
 }
 
 div#container {
@@ -45,26 +43,14 @@ div#container {
     /*min-height: 350px;*/
 }
 
-/*div#content {*/
-    /*width: 100%;*/
-    /*height: 100%;*/
-    /*z-index:1000;*/
-    /*background: white;*/
-/*}*/
-
 #close-window {
-    /*position: absolute;*/
-    /*top: 0;*/
-    /*right: 0;*/
-    /*z-index: 1000;*/
-    /*float: right;*/
     -webkit-app-region: no-drag;
 }
 
-/*div#state-machine, div#graph-container {*/
-    /*width: 100%;*/
-    /*height: 100%;*/
-    /*background:#555;*/
-    /*overflow: auto;*/
-    /*vertical-align: top;*/
-/*}*/
+#branchSelector {
+    float: Left;
+}
+
+.selector {
+    margin-right: 10px
+}

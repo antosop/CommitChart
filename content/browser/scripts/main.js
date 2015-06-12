@@ -52,6 +52,26 @@ function update(){
     });
 }
 
+function switchBranch(branch){
+    return repo.needsCommit().then(function(needsCommit){
+        if (needsCommit){
+            throw new Error('Please checkin, shelf, or revert');
+        } else {
+            repo.updateToBranch(branch);
+        }
+    });
+}
+
+function switchFeature(feature){
+    return repo.needsCommit().then(function(needsCommit){
+        if (needsCommit){
+            throw new Error('Please checkin, shelf, or revert');
+        } else {
+            repo.updateToBookmark(feature);
+        }
+    });
+}
+
 function push(){
     return repo.push().then(function(){
         notifier.notify({
@@ -73,6 +93,7 @@ function runIfOpen(action, func){
             });
         }).then(function(){
             monitor.updateHistory()
+            .then(renderView)
             .then(stopWaiting);
         });
     } else {
@@ -176,6 +197,7 @@ function updateState(stat){
     if (!waiting){
         showState();
     }
+    renderView();
 }
 
 function updateCurrentBookmark(name){
@@ -210,9 +232,61 @@ function handleRepoChange(dir) {
     openRepo();
 }
 
+function handleBranchSelect(branch){
+    runIfOpen('Switch Branch', function(){
+        return switchBranch(branch);
+    });
+}
+
+function handleFeatureSelect(feature){
+    runIfOpen('Switch Feature', function(){
+        return switchFeature(feature);
+    });
+}
+
 function renderView(){
-    var mainView = <MainView onRepoChange={handleRepoChange} repoDir={{value: directory, isValid: !!repo}} />;
-    React.render(mainView, document.getElementById('container'));
+    var mainView;
+    if (repo){
+        var currentBranch;
+        var currentFeature;
+        var branches;
+        var features;
+        repo.getCurrentBranch().then(function(branch){
+            currentBranch = branch;
+            return repo.getBranches();
+        }).then(function(branchNames){
+            branches = branchNames;
+            return repo.getCurrentBookmark();
+        }).then(function(bookmark){
+            currentFeature = bookmark;
+            return repo.getBookmarksInBranch(currentBranch);
+        }).then(function(bookmarks){
+            features = bookmarks;
+            mainView = (
+                <MainView
+                    onRepoChange={handleRepoChange}
+                    onBranchSelect={handleBranchSelect}
+                    onFeatureSelect={handleFeatureSelect}
+                    repo={{
+                        value: directory,
+                        isValid: true,
+                        currentBranch: currentBranch,
+                        currentFeature: currentFeature,
+                        branches: branches,
+                        features: features
+                    }} />
+            );
+            React.render(mainView, document.getElementById('container'));
+        });
+    } else {
+        mainView = (
+          <MainView
+              onRepoChange={handleRepoChange}
+              onBranchSelect={handleBranchSelect}
+              repo={{value: directory, isValid: false}} />
+        );
+        React.render(mainView, document.getElementById('container'));
+    }
 }
 
 jQuery(win.window.document).ready(function(){

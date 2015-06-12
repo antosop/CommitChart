@@ -113,6 +113,22 @@ Repo.prototype.getIncoming = function() {
     });
 };
 
+Repo.prototype.getBookmarks = function() {
+    return this.run('log', '-r bookmark()', '-Tjson')
+    .then(function(output){
+        var result = JSON.parse(output);
+        return Promise.resolve(_.flattenDeep(_.pluck(result, 'bookmarks')));
+    });
+};
+
+Repo.prototype.getBookmarksInBranch = function(branch){
+    return this.run('log', '-r bookmark() & branch(' + branch + ')', '-Tjson')
+    .then(function(output){
+        var result = JSON.parse(output);
+        return Promise.resolve(_.flattenDeep(_.pluck(result, 'bookmarks')));
+    });
+};
+
 Repo.prototype.getCurrentBookmark = function() {
     return this.run('log', '-r .', '-T {currentbookmark}')
     .then(function(output){
@@ -182,6 +198,15 @@ Repo.prototype.rebaseToRemoteBranchHead = function() {
 
 Repo.prototype.update = function(revision) {
     return this.run('update', revision);
+};
+
+Repo.prototype.updateToBranch = function(branch) {
+    var repo = this;
+    return repo.update('heads((! outgoing()) & branch(' + branch + '))');
+};
+
+Repo.prototype.updateToBookmark = function(bookmark) {
+    return this.update(bookmark);
 };
 
 Repo.prototype.updateToRemoteBranchHead = function() {

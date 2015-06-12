@@ -1,7 +1,7 @@
 require('es6-promise').polyfill();
 //var HGMonitor = require('./hg-monitor');
 var hg = require('./hg');
-var path = require('path');
+var _ = require('lodash');
 //var fs = require('fs');
 //var Growl = require('node-notifier').Growl;
 //var  exec = require('child_process').exec;
@@ -25,11 +25,14 @@ var path = require('path');
 var repo;
 hg.open('C:/html5').then(function(repository){
     repo = repository;
-    return repo.run('log', '-r .', '-T {currentbookmark}');
-}).then(function(e, r){
-    console.log('"' + r.trim() + '"');
+    return repo.run('log', '-r .');
+})
+.then(function(r){
+    //var result = JSON.parse(r);
+    //console.log(_.pluck(result, 'bookmarks'));
     repo.close();
-}).catch(function(e){
+})
+.catch(function(e){
     console.log('e : ', e);
     repo.close();
 });
