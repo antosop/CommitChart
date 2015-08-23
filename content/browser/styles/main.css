@@ -54,3 +54,11 @@ div#container {
 .selector {
     margin-right: 10px
 }
+
+.close-item {
+    float: Right;
+}
+
+.close-item:hover {
+    color: red;
+}

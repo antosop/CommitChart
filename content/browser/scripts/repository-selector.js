@@ -45,7 +45,12 @@ var RepoSelector = React.createClass({
         this.props.onFeatureSelect(key);
     },
 
+    handleClose(key) {
+        alert(key);
+    },
+
     render() {
+        var that = this;
         var branchDropdown;
         var featureDropdown;
         if (this.props.isValid){
@@ -60,6 +65,7 @@ var RepoSelector = React.createClass({
                                 active={v === this.state.currentBranch}
                                 onSelect={this.handleBranchSelect}>
                                 {v}
+                                <span onClick={function(e){that.handleClose(v); e.stopPropagation(); }} className="close-item glyphicon glyphicon-remove"/>
                             </B.MenuItem>
                         );
                     })
@@ -73,6 +79,7 @@ var RepoSelector = React.createClass({
                         className={v === this.state.currentFeature ? 'active' : ''}
                         onSelect={this.handleFeatureSelect}>
                         {v}
+                        <span onClick={function(e){that.handleClose(v); e.stopPropagation(); }} className="close-item glyphicon glyphicon-remove"/>
                     </B.MenuItem>
                );
            });

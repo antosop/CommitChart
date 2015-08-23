@@ -1,7 +1,10 @@
+//var r = 'false';
+//console.log(!r || !JSON.parse(r));
 require('es6-promise').polyfill();
 //var HGMonitor = require('./hg-monitor');
 var hg = require('./hg');
-var _ = require('lodash');
+//var path = require('path');
+//var _ = require('')
 //var fs = require('fs');
 //var Growl = require('node-notifier').Growl;
 //var  exec = require('child_process').exec;
@@ -23,16 +26,16 @@ var _ = require('lodash');
 //});
 
 var repo;
-hg.open('C:/html5').then(function(repository){
+hg.open('c:/clones/diffTest').then(function(repository){
     repo = repository;
-    return repo.run('log', '-r .');
-})
-.then(function(r){
+    return repo.isUnnamedHead();
+}).then(function(r){
+    console.log(r);
+    //console.log('isUnnamedHead', !!r && JSON.parse(r));
     //var result = JSON.parse(r);
     //console.log(_.pluck(result, 'bookmarks'));
     repo.close();
-})
-.catch(function(e){
-    console.log('e : ', e);
+}).catch(function(e){
+    console.log(e.stack);
     repo.close();
 });

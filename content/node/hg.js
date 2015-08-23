@@ -205,6 +205,13 @@ Repo.prototype.updateToBranch = function(branch) {
     return repo.update('heads((! outgoing()) & branch(' + branch + '))');
 };
 
+Repo.prototype.isUnnamedHead = function() {
+    return this.run('log', '-T {if(bookmarks, \'false\', \'true\')}', '-r . & head() & outgoing()')
+    .then(function(r){
+        return Promise.resolve(!!r && JSON.parse(r));
+    });
+};
+
 Repo.prototype.updateToBookmark = function(bookmark) {
     return this.update(bookmark);
 };
