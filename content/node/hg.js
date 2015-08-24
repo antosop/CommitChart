@@ -210,7 +210,14 @@ Repo.prototype.rebaseToRemoteBranchHead = function() {
 };
 
 Repo.prototype.update = function(revision) {
-    return this.run('update', revision);
+    var repo = this;
+    return this.run('update', revision).catch(function(err){
+        if(err.message.match(/use 'hg resolve'/g)) {
+            return repo.resolve().catch(function(){
+                throw new Error('Failed to merge');
+            });
+        }
+    });
 };
 
 Repo.prototype.updateToRemoteBranchHead = function() {
