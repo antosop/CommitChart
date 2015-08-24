@@ -2,6 +2,7 @@ var HGCommandServer = require('hg').HGCommandServer;
 var path = require('path');
 var fs = require('fs');
 var _ = require('lodash');
+var exec = require('child_process').exec;
 
 var State = {
     clean: 0,
@@ -45,7 +46,7 @@ function openHgRepo(dir) {
                             value = value + error.message;
                         });
 
-                        var repo = new Repo(commandServer, queue);
+                        var repo = new Repo(dir, commandServer, queue);
                         resolve(repo);
                     }
                 });
@@ -56,12 +57,26 @@ function openHgRepo(dir) {
     });
 }
 
-function Repo(commandServer, queue){
+function Repo(dir, commandServer, queue){
     this.run = function() {
         var args = arguments;
         return new Promise(function(resolve, reject){
             commandServer.runcommand.apply(commandServer, args);
             queue.push({resolve: resolve, reject: reject});
+        });
+    };
+
+    this.resolve = function() {
+        return new Promise(function(resolve, reject){
+            exec('hg resolve --all -R ' + dir, function(err, stdout, stderr){
+                if (err){
+                    reject('exec error: ' + err);
+                } else if (stderr){
+                    reject('error: ' + err);
+                } else {
+                    resolve(stdout);
+                }
+            });
         });
     };
 
