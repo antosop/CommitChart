@@ -191,7 +191,21 @@ Repo.prototype.rebaseToRemoteBranchHead = function() {
         if (!hasRebase){
             throw new Error('Please enable rebase extension');
         }
-        return repo.run('rebase', '-b .', '-d ' + remoteBranchHead);
+        return repo.run('rebase', '-b .', '-d ' + remoteBranchHead).catch(
+            function(err) {
+                if ( err.message.match(/unresolved conflicts/g) ) {
+                    return repo.resolve().then(function(){
+                        return repo.run('rebase', '--continue');
+                    }).catch(function(){
+                        return repo.run('rebase', '--abort').then(function(){
+                            throw new Error('failed to rebase');
+                        });
+                    });
+                } else {
+                    throw err;
+                }
+            }
+        );
     });
 };
 
