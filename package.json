@@ -6,7 +6,7 @@
   "window": {
     "title": "Source Command",
     "icon": "content/images/check-in.png",
-    "toolbar": true,
+    "toolbar": false,
     "frame": false,
     "show": true,
     "height": 85,
