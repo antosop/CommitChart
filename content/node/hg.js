@@ -70,9 +70,9 @@ function Repo(dir, commandServer, queue){
         return new Promise(function(resolve, reject){
             exec('hg resolve --all -R ' + dir, function(err, stdout, stderr){
                 if (err){
-                    reject('exec error: ' + err);
+                    reject(new Error(err));
                 } else if (stderr){
-                    reject('error: ' + err);
+                    reject(new Error(stderr));
                 } else {
                     resolve(stdout);
                 }
@@ -191,21 +191,35 @@ Repo.prototype.rebaseToRemoteBranchHead = function() {
         if (!hasRebase){
             throw new Error('Please enable rebase extension');
         }
-        return repo.run('rebase', '-b .', '-d ' + remoteBranchHead).catch(
-            function(err) {
-                if ( err.message.match(/unresolved conflicts/g) ) {
-                    return repo.resolve().then(function(){
-                        return repo.run('rebase', '--continue');
-                    }).catch(function(){
-                        return repo.run('rebase', '--abort').then(function(){
-                            throw new Error('failed to rebase');
+        var id;
+        return repo.run('id').then(function(val){
+            id = val;
+        }).then( function() {
+            return repo.run('rebase', '-b .', '-d ' + remoteBranchHead).catch(
+                function(err) {
+                    var resolveConflicts = function() {
+                        return repo.resolve().then(function(){
+                            return repo.run('rebase', '--continue');
+                        }).catch(function(error){
+                            if ( error.message.match(/unresolved conflicts/g) ) {
+                                return resolveConflicts();
+                            } else {
+                                return repo.run('rebase', '--abort').then(function(){
+                                    return repo.run('update', '-C', id);
+                                }).then(function(){
+                                    throw new Error('failed to rebase');
+                                });
+                            }
                         });
-                    });
-                } else {
-                    throw err;
+                    };
+                    if ( err.message.match(/unresolved conflicts/g) ) {
+                        return resolveConflicts();
+                    } else {
+                        throw err;
+                    }
                 }
-            }
-        );
+            );
+        });
     });
 };
 
