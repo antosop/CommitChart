@@ -6,11 +6,11 @@
   "window": {
     "title": "Source Command",
     "icon": "content/images/check-in.png",
-    "toolbar": true,
+    "toolbar": false,
     "frame": false,
     "show": true,
-    "height": 125,
-    "min_height": 125
+    "height": 85,
+    "min_height": 85
   },
   "scripts": {
     "postinstall": "node shortcut.js",
